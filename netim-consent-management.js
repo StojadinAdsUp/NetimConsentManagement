@@ -578,7 +578,7 @@
 
             style.appendChild(document.createTextNode(css));
 
-        }
+        };
 
         /* Setting up the buttons */
         setHandlers = (bannerType) => {
@@ -624,14 +624,14 @@
             }
             
 
-        }
+        };
 
         removeBanner = () => {
 
             let container = document.querySelector('#ACM-container');
             container.remove();
             
-        }
+        };
     }
 
     let isCookie = (cookieName) => {
@@ -647,7 +647,7 @@
             }
         }
         return res;
-    }
+    };
 
     let getCookieValue = (cookieName) => {
         let cookieValue;
@@ -661,7 +661,7 @@
         }
 
         return cookieValue;
-    }
+    };
 
     let getAuthorizedCookies = () => {
         let separator = "%ACM";
@@ -676,7 +676,7 @@
         }
 
         updateDataLayer(authorizedCookies);
-    }
+    };
 
     let setAuthorizedCookies = (pref, stats, mark) => {
 
@@ -686,7 +686,7 @@
             preference : pref,
             statistics : stats,
             marketing : mark
-        }
+        };
 
         if(authorizedCookies.preference) { cookieValue += separator + "preference";}
         if(authorizedCookies.statistics) { cookieValue += separator + "statistics";}
@@ -700,7 +700,7 @@
 
         updateDataLayer(authorizedCookies);
 
-    }
+    };
 
     let updateDataLayer = (authorizedCookies) => {
 
@@ -710,7 +710,7 @@
             "event" : "ACM_update"
         });
         
-    }
+    };
 
     let init = () => {
 
@@ -724,8 +724,12 @@
 
         }
 
-    }
+    };
 
-    init();
+    window.addEventListener("load", function () {
+
+        setTimeout(init, 1000);
+
+    });
 
 })();
