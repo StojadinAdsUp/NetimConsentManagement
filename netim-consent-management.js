@@ -1,9 +1,7 @@
 (function(){
 
-    const COOKIE_NAME = "acm_cookie";
+    const ITEM_NAME = "acm_consent";
 
-    /* JSON used to generate the banner ( refer to ./template/banner.thml) and the controlPanel (refer to ./template/controlPanel.html) */
-    /* Text modification sould be done here */
     const CONFIG = {
         "banner" : [{
             "name" : "Container",
@@ -318,8 +316,7 @@
             }]
         }]
     };
-
-    /* Style modification should be done here */
+    
     const STYLE = `
         @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
@@ -524,7 +521,8 @@
     `;
     class AcmBanner
     {
-        lang = document.documentElement.lang;
+
+        lang = document.documentElement.lang || "en";
 
         constructor (bannerType, content) {
 
@@ -532,11 +530,11 @@
             this.addStyle();
             this.setHandlers(bannerType);
 
-        }
+        };
         
         buildHtml = (parent, elem) => {
             
-            /* Loop for elements present in CONFIG and generate the HTML */
+
             for(let i = 0; i < elem.length; i++) {
 
                 let e = elem[i];
@@ -560,9 +558,8 @@
                 if(e.children) { this.buildHtml(html, e.children); }
             }
 
-        }
+        };
 
-        /* Add the stylesheet (STYLE) to the container */
         addStyle = () => {
 
             let css = STYLE,
@@ -580,7 +577,6 @@
 
         };
 
-        /* Setting up the buttons */
         setHandlers = (bannerType) => {
 
             if(bannerType == "banner") {
@@ -630,51 +626,40 @@
 
             let container = document.querySelector('#ACM-container');
             container.remove();
-            
+
         };
     }
 
-    let isCookie = (cookieName) => {
-        let res;
-        let cookieNameEq = cookieName + "=";
-        let cookiesArray = document.cookie.split(";");
+    let isConsentStored = (itemName) => {
 
-        for (let i = 0; i < cookiesArray.length; i++) {
-            if (cookiesArray[i].includes(cookieNameEq)) {
-                res = true;
-            } else {
-                res = false;
-            }
-        }
+        let res;
+        let localStorageValue = window.localStorage.getItem(itemName);
+
+        localStorageValue ? res = true : res = false;
+
         return res;
+
     };
 
-    let getCookieValue = (cookieName) => {
-        let cookieValue;
-        let cookieNameEq = cookieName + "=";
-        let cookiesArray = document.cookie.split(";");
+    let getStoredConsentValue = (itemName) => {
 
-        for (let i = 0; i < cookiesArray.length; i++) {
-            if (cookiesArray[i].includes(cookieNameEq)) {
-                cookieValue = cookiesArray[i].substring(cookieNameEq.length);
-            }
-        }
+        return window.localStorage.getItem(itemName);
 
-        return cookieValue;
     };
 
     let getAuthorizedCookies = () => {
         let separator = "%ACM";
-        let authorizedCookiesArray = getCookieValue(COOKIE_NAME).split(separator);
+        let authorizedCookiesArray = getStoredConsentValue(ITEM_NAME).split(separator);
         let authorizedCookies = {};
 
         for(let i = 0; i < authorizedCookiesArray.length; i++) {
             let cookie = authorizedCookiesArray[i];
-            if(cookie == "preference", "statistics", "marketing") {
+            
+            if(cookie === "preference" || cookie === "statistics" || cookie === "marketing") {
                 authorizedCookies[cookie] = true;
             }
         }
-
+        
         updateDataLayer(authorizedCookies);
     };
 
@@ -686,17 +671,13 @@
             preference : pref,
             statistics : stats,
             marketing : mark
-        };
+        }
 
         if(authorizedCookies.preference) { cookieValue += separator + "preference";}
         if(authorizedCookies.statistics) { cookieValue += separator + "statistics";}
         if(authorizedCookies.marketing) { cookieValue += separator + "marketing";}
         
-        let date = new Date();
-        date.setTime(date.getTime() + (30*24*60*60*1000));
-        let expires = "; expires=" + date.toUTCString();
-
-        document.cookie = COOKIE_NAME + "=" + cookieValue + expires + " ; path=/";
+        window.localStorage.setItem("acm_consent", cookieValue);
 
         updateDataLayer(authorizedCookies);
 
@@ -714,9 +695,9 @@
 
     let init = () => {
 
-        if (isCookie(COOKIE_NAME)) {
+        if (isConsentStored(ITEM_NAME)) {
 
-            getAuthorizedCookies(getCookieValue());
+            getAuthorizedCookies(getStoredConsentValue());
 
         } else {
 
@@ -728,7 +709,7 @@
 
     window.addEventListener("load", function () {
 
-        setTimeout(init, 1000);
+        init();
 
     });
 
